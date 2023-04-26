@@ -1,16 +1,15 @@
 isIter = lambda arg: isinstance(arg, list) or isinstance(arg, tuple)
 # ^ allows program to handle tuples and lists
 # ^ the above code is the same as the below code
-# 
-#def isIter(arg):
-#    return (isinstance(arg, list) or isinstance(arg, tuple))
 
 def createTable(name: str, fields: dict):
-    """Generate a CREATE TABLE sqlite query"""
-    # fields format example:
-    # {"ID": ["INT", "PRIMARY KEY"], "NAME": ["TEXT", "NOT NULL"]}
-    # OR
-    # {"ID": "INT PRIMARY KEY", "NAME": "TEXT NOT NULL"}
+    """Generate a CREATE TABLE sqlite query
+
+    fields format example:
+    {"ID": ["INT", "PRIMARY KEY"], "NAME": ["TEXT", "NOT NULL"]}
+    or
+    {"ID": "INT PRIMARY KEY", "NAME": "TEXT NOT NULL"}
+    """
     
     query = f"CREATE TABLE {name}("
 
@@ -28,7 +27,12 @@ def createTable(name: str, fields: dict):
 
 
 def addColumn(tableName: str, columnName: str, args: tuple | str):
-    """Generate an sqlite query to add a column"""
+    """Generate an sqlite query to add a column
+
+    Example: addColumn("myTable", "myColumn", "INT DEFAULT 0")
+    or
+    Example: addColumn("myTable", "myColumn", ["INT", "DEFAULT 0"])
+    """
     
     if isIter(args): args = " ".join(args)
         
@@ -132,12 +136,16 @@ values (dict) - Specifies which column (key in the dictionary) should get which 
 def update( # shorthand for _generic
     tableName: str,
     values: dict,
-    conditions: dict = None,
+    conditions: dict = None, del
     orderBy: str = None,
     limit: int = None,
     offset: int = None,
     desc: bool = None):
-    """Generate an UPDATE sqlite query"""
+    """Generate an UPDATE sqlite query
+
+    Example: update("myTable", {"salary": 100, "department": "sales"}, {"employee_id": 23, "job_title": "Sales Manager"})
+    For information about the orderBy, limit, offset, and desc values see https://www.sqlite.org/lang_update.html
+    """
     
     return _generic(tableName, "UPDATE", conditions, orderBy, limit, offset, desc, values=values)
 
@@ -145,12 +153,17 @@ def update( # shorthand for _generic
 def select( # shorthand for _generic
     tableName: str,
     conditions: dict = None,
-    columns: dict = None,
+    columns: tuple = None,
     orderBy: str = None,
     limit: int = None,
     offset: int = None,
     desc: bool = None):
-    """Generate a SELECT sqlite query"""
+    """Generate a SELECT sqlite query
+
+    Example: select("myTable", {"employee_id": 23, "job_title": "Sales Manager"}, ["salary", "department"])
+    Note that either lists or tuples can be used for the "columns" argument
+    If "columns" is left empty, it is defaulted to "*"
+    """
 
     return _generic(tableName, "SELECT", conditions, orderBy, limit, offset, desc, columns=columns)
 
@@ -162,7 +175,10 @@ def delete( # shorthand for _generic
     limit: int = None,
     offset: int = None,
     desc: bool = None):
-    """Generate a DELETE sqlite query"""
+    """Generate a DELETE sqlite query
+
+    Example: delete("myTable", {"employee_id": 23, "job_title": "Sales Manager"})
+"""
 
     return _generic(tableName, "DELETE", conditions, orderBy, limit, offset, desc)
 
