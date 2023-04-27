@@ -136,7 +136,7 @@ values (dict) - Specifies which column (key in the dictionary) should get which 
 def update( # shorthand for _generic
     tableName: str,
     values: dict,
-    conditions: dict = None, del
+    conditions: dict = None,
     orderBy: str = None,
     limit: int = None,
     offset: int = None,
