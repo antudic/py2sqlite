@@ -2,6 +2,8 @@ isIter = lambda arg: isinstance(arg, list) or isinstance(arg, tuple)
 # ^ allows program to handle tuples and lists
 # ^ the above code is the same as the below code
 
+getTables = "SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%';"
+
 def createTable(name: str, fields: dict):
     """Generate a CREATE TABLE sqlite query
 
