@@ -21,9 +21,9 @@ def createTable(name: str, fields: dict):
         if isIter(fArgs): # convert to string if iter
             fArgs = " ".join(fArgs)
         
-        query+= f"\n{fName} {fArgs},"
+        query+= f"{fName} {fArgs}, "
 
-    query = query[:-1] # remove trailing ","
+    query = query[:-2] # remove trailing ", "
     query+= ");" # add ending
 
     return query
