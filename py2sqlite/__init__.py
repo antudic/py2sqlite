@@ -5,6 +5,7 @@ isIter = lambda arg: isinstance(arg, list) or isinstance(arg, tuple)
 getTables = "SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%';"
 
 def createTable(name: str, fields: dict):
+    # https://www.sqlite.org/datatype3.html
     """Generate a CREATE TABLE sqlite query
 
     fields format example:
