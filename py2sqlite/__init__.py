@@ -1,8 +1,14 @@
-isIter = lambda arg: isinstance(arg, list) or isinstance(arg, tuple)
-# ^ allows program to handle tuples and lists
-# ^ the above code is the same as the below code
+def isIter(arg) -> bool:
+    # allows program to handle tuples and lists
+    return isinstance(arg, list) or isinstance(arg, tuple)
 
 getTables = "SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%';"
+
+_insertDict1 = {None: isIter}
+_insertDict2 = {
+            True: lambda: f"VALUES{wrap(values)}",
+            False: lambda: wrap(values.keys()) + " VALUES" + wrap(values.values())
+        }
 
 def createTable(name: str, fields: dict):
     # https://www.sqlite.org/datatype3.html
@@ -47,22 +53,20 @@ def getColumns(name: str):
     return f"PRAGMA TABLE_INFO({name});"
 
 
-def insert(tableName: str, values: tuple | dict, columns=None):
-    """Generate an INSERT sqlite query"""
+def insert(tableName: str, values: tuple | dict, columns=None, useDoubleQuotes: bool = False):
+    # This is a horribly written function. I, @pyes on Discord, take full responsibility
+    """Generate an INSERT sqlite query
+    
+    useDoubleQuotes - uses double quotes (") if True or single quotes (') if False (breaks if anything else)
+    """
+    wrap = lambda iterable: "(" + ", ".join(map(lambda x: ((char := {True: '"', False: "'"}[useDoubleQuotes]) + x + char), iterable)) + ")"
     query = f"INSERT INTO {tableName} "
-    
-    if columns:
-        values, columns = columns, values # switch to correct order
-        query+= f"{str(columns)} VALUES{str(values)}"
-    
-    elif isIter(values):
-        values = str(values)[1:-1]
-        # The "str.join" method does not work with non-string types
-        query+= f"VALUES({values})"
 
-    else:
-        # Below is an atrocious line of code. Don't do this.
-        query+= " VALUES".join(map(str, map(tuple, (values.keys(), values.values()))))
+    try:
+        query+= _insertDict2[(_insertDict1[columns](values))]()
+
+    except KeyError:
+        query+= f"{wrap(columns)} VALUES{wrap(values)}"
         
     query+= ";"
     
