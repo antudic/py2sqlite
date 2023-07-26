@@ -53,13 +53,10 @@ def getColumns(name: str):
     return f"PRAGMA TABLE_INFO({name});"
 
 
-def insert(tableName: str, values: tuple | dict, columns=None, useDoubleQuotes: bool = False):
+def insert(tableName: str, values: tuple | dict, columns=None):
     # This is a horribly written function. I, @pyes on Discord, take full responsibility
-    """Generate an INSERT sqlite query
-
-    useDoubleQuotes - uses double quotes (") if True or single quotes (') if False (breaks if anything else)
-    """
-    wrap = lambda iterable: "(" + ", ".join(map(lambda x: ((char := {True: '"', False: "'"}[useDoubleQuotes]) + x + char), iterable)) + ")"
+    """Generate an INSERT sqlite query"""
+    wrap = lambda iterable: "(" + ", ".join(map(str.__repr__, iterable)) + ")"
     query = f"INSERT INTO {tableName} "
 
     try:
