@@ -6,8 +6,8 @@ getTables = "SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE
 
 _insertDict1 = {None: isIter}
 _insertDict2 = {
-            True: lambda: f"VALUES{wrap(values)}",
-            False: lambda: wrap(values.keys()) + " VALUES" + wrap(values.values())
+            True: lambda wrap, values: f"VALUES{wrap(values)}",
+            False: lambda wrap, values: wrap(values.keys()) + " VALUES" + wrap(values.values())
         }
 
 def createTable(name: str, fields: dict):
@@ -19,14 +19,14 @@ def createTable(name: str, fields: dict):
     or
     {"ID": "INT PRIMARY KEY", "NAME": "TEXT NOT NULL"}
     """
-    
+
     query = f"CREATE TABLE {name}("
 
     for fName, fArgs in fields.items(): # fieldName, fieldArgs
-        
+
         if isIter(fArgs): # convert to string if iter
             fArgs = " ".join(fArgs)
-        
+
         query+= f"{fName} {fArgs}, "
 
     query = query[:-2] # remove trailing ", "
@@ -42,9 +42,9 @@ def addColumn(tableName: str, columnName: str, args: tuple | str):
     or
     Example: addColumn("myTable", "myColumn", ["INT", "DEFAULT 0"])
     """
-    
+
     if isIter(args): args = " ".join(args)
-        
+
     return f"ALTER TABLE {tableName} ADD COLUMN '{columnName}' {args};"
 
 
@@ -56,27 +56,27 @@ def getColumns(name: str):
 def insert(tableName: str, values: tuple | dict, columns=None, useDoubleQuotes: bool = False):
     # This is a horribly written function. I, @pyes on Discord, take full responsibility
     """Generate an INSERT sqlite query
-    
+
     useDoubleQuotes - uses double quotes (") if True or single quotes (') if False (breaks if anything else)
     """
     wrap = lambda iterable: "(" + ", ".join(map(lambda x: ((char := {True: '"', False: "'"}[useDoubleQuotes]) + x + char), iterable)) + ")"
     query = f"INSERT INTO {tableName} "
 
     try:
-        query+= _insertDict2[(_insertDict1[columns](values))]()
+        query+= _insertDict2[(_insertDict1[columns](values))](wrap, values)
 
     except KeyError:
         query+= f"{wrap(columns)} VALUES{wrap(values)}"
-        
+
     query+= ";"
-    
+
     return query
 
 
 def _generic(
     tableName: str, # name of the table
     mode: str, # "DELETE", "UPDATE" or "SELECT"
-    conditions: dict = None, # 
+    conditions: dict = None, #
     orderBy: str = None,
     limit: int = None,
     offset: int = None,
@@ -153,7 +153,7 @@ def update( # shorthand for _generic
     Example: update("myTable", {"salary": 100, "department": "sales"}, {"employee_id": 23, "job_title": "Sales Manager"})
     For information about the orderBy, limit, offset, and desc values see https://www.sqlite.org/lang_update.html
     """
-    
+
     return _generic(tableName, "UPDATE", conditions, orderBy, limit, offset, desc, values=values)
 
 
@@ -188,4 +188,3 @@ def delete( # shorthand for _generic
 """
 
     return _generic(tableName, "DELETE", conditions, orderBy, limit, offset, desc)
-
