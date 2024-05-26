@@ -56,7 +56,7 @@ def getColumns(name: str):
 def insert(tableName: str, values: tuple | dict, columns=None):
     # This is a horribly written function. I, @pyes on Discord, take full responsibility
     """Generate an INSERT sqlite query"""
-    wrap = lambda iterable: "(" + ", ".join(map(str.__repr__, iterable)) + ")"
+    wrap = lambda iterable: "(" + ", ".join(map(repr, iterable)) + ")"
     query = f"INSERT INTO {tableName} "
 
     try:
